@@ -43,7 +43,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const data = await res.json();
 
     if (res.ok) {
-      window.location.href = 'amazon-frentend/amazon.html';
+      window.location.href = '/amazon.html';
     } else {
       alert('Login failed: ' + (data?.error || 'Unknown error'));
     }
@@ -54,4 +54,5 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 </script>
 </body>
 </html>
+
 
