@@ -1,109 +1,219 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Amazon Clone</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-body { font-family: Arial; margin:0; background:#f4f4f4; }
-header { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background:#232f3e; color:#fff; }
-.header-left h1 { margin:0; font-size:20px; }
-nav a { color:#fff; margin-left:14px; text-decoration:none; }
-#productGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
-  gap: 18px;
-  padding: 20px;
-}
-.product-card {
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  display: flex;
-  flex-direction: column;
-}
-.product-card img { width: 100%; height: 150px; object-fit: cover; }
-.product-info { padding: 12px; flex-grow: 1; }
-.add-btn {
-  background: #ff9900;
-  border: none;
-  padding: 8px 10px;
-  border-radius: 6px;
-  color: #fff;
-  cursor: pointer;
-  width: 100%;
-  font-weight: bold;
-}
-</style>
+  <meta charset="utf-8">
+  <title>Amazon Clone</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #232f3e;
+      color: #fff;
+    }
+
+    .header-left h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    nav a {
+      color: #fff;
+      margin-left: 14px;
+      text-decoration: none;
+    }
+
+    .more-menu {
+      position: relative;
+      display: inline-block;
+    }
+
+    .more-dropdown {
+      position: absolute;
+      right: 0;
+      background: #fff;
+      color: #111;
+      border-radius: 6px;
+      padding: 8px;
+      display: none;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+    }
+
+    .more-dropdown a {
+      display: block;
+      padding: 6px 10px;
+      color: #111;
+      text-decoration: none;
+    }
+
+    .more-dropdown a:hover {
+      background: #f0f0f0;
+    }
+
+    #productGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 18px;
+      padding: 20px;
+    }
+
+    .product-card {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s;
+    }
+
+    .product-card:hover {
+      transform: scale(1.03);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .product-info {
+      padding: 12px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .add-btn {
+      background: #ff9900;
+      border: none;
+      padding: 8px 10px;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .add-btn:hover {
+      background: #e68a00;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <div class="header-left"><h1>Amazon Clone</h1></div>
-  <nav>
-    <a href="/amazon.html">Catalog</a>
-    <a href="/cart.html">Cart</a>
-    <a href="/payment.html">Payment</a>
-    <a href="/api/logout" onclick="logout(event)">Logout</a>
-  </nav>
-</header>
+  <header>
+    <div class="header-left">
+      <h1>Amazon Clone</h1>
+    </div>
+    <nav>
+      <a href="amazon.html">Catalog</a>
+      <a href="cart.html">Cart</a>
+      <a href="payment.html">Payment</a>
+      <span class="more-menu">
+        <a href="#" id="moreBtn">More ▾</a>
+        <div class="more-dropdown" id="moreDropdown">
+          <a href="prime.html">Amazon Prime Video</a>
+          <a href="pay.html">Amazon Pay</a>
+        </div>
+      </span>
+      <a href="/logout">Logout</a>
+    </nav>
+  </header>
 
-<div id="productGrid"></div>
+  <div id="productGrid"></div>
 
-<script>
-const API_BASE = 'https://amazon-backend-v0nz.onrender.com';
+  <script>
+    const API_BASE = 'https://amazon-backend-v0nz.onrender.com'; // ✅ Added missing definition
 
-async function loadProducts() {
-  try {
-    const res = await fetch(API_BASE + '/api/products', { credentials: 'include' });
-    const products = await res.json();
-    renderProducts(products);
-  } catch(e) {
-    alert('Failed to load products');
-  }
-}
+    const products = [
+      { id: 1, name: 'Headphones', price: 999, image: 'https://m.media-amazon.com/images/I/517lSvEVVsL._SL1500_.jpg' },
+      { id: 2, name: 'Smart Watch', price: 1999, image: 'https://m.media-amazon.com/images/I/61ftG19NACL._AC_SL1500_.jpg' },
+      { id: 3, name: 'Laptop', price: 39999, image: 'https://www.apple.com/newsroom/images/2025/03/apple-introduces-the-new-macbook-air-with-the-m4-chip-and-a-sky-blue-color/article/Apple-MacBook-Air-hero-250305_big.jpg.large_2x.jpg' },
+      { id: 4, name: 'Smartphone', price: 15999, image: 'https://in-exstatic-vivofs.vivo.com/gdHFRinHEMrj3yPG/1741672409928/20eb7eea4aadbc4f9ba3ec7cae271d5b.png' },
+      { id: 5, name: 'Gaming Mouse', price: 1499, image: 'https://m.media-amazon.com/images/I/61vF4LdktpL._AC_.jpg' },
+      { id: 6, name: 'Bluetooth Speaker', price: 2499, image: 'https://www.hindustantimes.com/ht-img/img/2024/01/23/1600x900/bluetooth_speaker_1706002228994_1706002254945.png' },
+      { id: 7, name: 'DSLR Camera', price: 29999, image: 'https://img.vistek.net/prodimgalt/large/440512_1.jpg' },
+      { id: 8, name: 'Wireless Earbuds', price: 3499, image: 'https://m.media-amazon.com/images/I/81zxmKZ0lxL._AC_SL1500_.jpg' },
+      { id: 9, name: 'Tablet', price: 12999, image: 'https://www.freeiconspng.com/uploads/tablet-png-23.png' },
+      { id: 10, name: 'Smart TV', price: 45999, image: 'https://pisces.bbystatic.com/image2/BestBuy_US/images/products/6470/6470246cv12d.jpg' },
+      { id: 11, name: 'Fitness Band', price: 1499, image: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=400&q=80' },
+      { id: 12, name: 'Home Theater', price: 21999, image: 'https://www.bassheadspeakers.com/wp-content/uploads/2017/08/Energy-Take-Classic-5.1-Home-Theater-System.jpg' }
+    ];
 
-function renderProducts(products) {
-  const grid = document.getElementById('productGrid');
-  grid.innerHTML = '';
-  products.forEach(product => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-      <img src="${product.image}" alt="${product.name}">
-      <div class="product-info">
-        <h3>${product.name}</h3>
-        <p>₹${product.price}</p>
-        <button class="add-btn" onclick="addToCart(${product.id})">Add to Cart</button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-}
+    function renderProducts() {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
+      products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img src="${product.image}" alt="${product.name}">
+          <div class="product-info">
+            <h3>${product.name}</h3>
+            <p>₹${product.price}</p>
+            <button class="add-btn" onclick="addToCart(${product.id})">Add to Cart</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
 
-async function addToCart(id) {
-  try {
-    const res = await fetch(API_BASE + '/api/cart/add', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      credentials: 'include',
-      body: JSON.stringify({ id, qty:1 })
+    async function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) {
+        alert('Product not found');
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/cart/add`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ id: product.id, qty: 1 })
+        });
+
+        if (!res.ok) {
+          if (res.status === 401) {
+            alert('Please login to add items to the cart.');
+            window.location.href = 'login.html';
+          } else {
+            alert('Failed to add product to cart.');
+          }
+        } else {
+          alert('Product added to cart!');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Error adding product to cart.');
+      }
+    }
+
+    // Dropdown menu toggle
+    const moreBtn = document.getElementById('moreBtn');
+    const moreDropdown = document.getElementById('moreDropdown');
+
+    moreBtn.addEventListener('click', e => {
+      e.preventDefault();
+      moreDropdown.style.display = moreDropdown.style.display === 'block' ? 'none' : 'block';
     });
-    const data = await res.json();
-    if (!res.ok) alert(data.error || 'Failed to add to cart');
-    else alert('Added to cart!');
-  } catch(e) {
-    alert('Error adding to cart');
-  }
-}
 
-async function logout(e){
-  e.preventDefault();
-  await fetch(API_BASE + '/api/logout', { credentials:'include' });
-  window.location.href='/login.html';
-}
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.more-menu')) {
+        moreDropdown.style.display = 'none';
+      }
+    });
 
-loadProducts();
-</script>
+    renderProducts();
+  </script>
 </body>
 </html>
