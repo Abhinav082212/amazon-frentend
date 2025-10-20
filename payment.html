@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Payment</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:Arial;margin:0;background:#f4f4f4}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:#232f3e;color:#fff}
+nav a{color:#fff;margin-left:14px;text-decoration:none}
+.container{padding:20px;background:#fff;margin:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.08);max-width:400px;margin-left:auto;margin-right:auto}
+h2{text-align:center;margin-bottom:18px}
+.input{width:100%;padding:10px;margin-bottom:12px;border-radius:6px;border:1px solid #ccc;font-size:14px}
+.btn{width:100%;padding:10px;background:#4a90e2;border:none;color:#fff;border-radius:6px;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>Payment</h1>
+  <nav>
+    <a href="/amazon.html">Catalog</a>
+    <a href="/cart.html">Cart</a>
+    <a href="/api/logout" onclick="logout(event)">Logout</a>
+  </nav>
+</header>
+
+<div class="container">
+  <h2>Checkout</h2>
+  <form id="paymentForm">
+    <select id="method" class="input">
+      <option value="Card">Card</option>
+      <option value="UPI">UPI</option>
+      <option value="EMI">EMI</option>
+      <option value="COD">Cash on Delivery</option>
+    </select>
+    <input class="input" id="card" placeholder="Card/UPI details (optional)" />
+    <button class="btn" type="submit">Pay Now</button>
+  </form>
+</div>
+
+<script>
+const API_BASE = 'https://amazon-backend-v0nz.onrender.com';
+
+document.getElementById('paymentForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const method = document.getElementById('method').value;
+  const details = document.getElementById('card').value;
+
+  try{
+    const res = await fetch(API_BASE + '/api/checkout', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      credentials:'include',
+      body:JSON.stringify({method, details})
+    });
+    const data = await res.json();
+    if(res.ok){
+      alert(data.message);
+      window.location.href='/amazon.html';
+    }else alert(data.error||'Payment failed');
+  }catch(e){
+    alert('Network error');
+  }
+});
+
+async function logout(e){
+  e.preventDefault();
+  await fetch(API_BASE + '/api/logout', { credentials:'include' });
+  window.location.href='/login.html';
+}
+</script>
+</body>
+</html>

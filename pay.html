@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Amazon Pay — Demo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;background:#f5f6f8;margin:0;color:#111}
+  .header{background:#fff;padding:14px 20px;border-bottom:1px solid #e6e6e6;display:flex;justify-content:space-between;align-items:center}
+  .header a{color:#111;text-decoration:none;font-weight:700}
+  .wrap{max-width:1100px;margin:18px auto;padding:0 14px}
+  .card{background:#fff;border-radius:8px;padding:16px;margin-bottom:16px;box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+  .balance{font-size:28px;font-weight:800;color:#1b7a3a}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:12px}
+  .tile{background:#fff;border:1px solid #eee;border-radius:8px;padding:12px;text-align:center;min-height:96px}
+  .tile img{height:34px;margin-bottom:6px}
+  .btn{background:#ff9900;border:none;color:#fff;padding:10px 12px;border-radius:6px;cursor:pointer}
+  .small{font-size:13px;color:#666}
+</style>
+</head>
+<body>
+  <div class="header"><div><a href="/amazon.html">‹ Back to store</a></div><div><strong>Amazon Pay</strong></div></div>
+  <div class="wrap">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div class="small">Amazon Pay Balance</div><div id="bal" class="balance">₹--</div></div>
+        <div><input id="topAmt" type="number" placeholder="Amount" style="padding:8px;border-radius:6px;border:1px solid #ddd"><button class="btn" id="topBtn">Top up</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Quick Actions</h3>
+      <div class="grid">
+        <div class="tile"><img src="https://img.icons8.com/fluency/48/000000/phone.png"/><div class="small">Mobile Recharge</div></div>
+        <div class="tile"><img src="https://img.icons8.com/fluency/48/000000/electricity.png"/><div class="small">Pay Bills</div></div>
+        <div class="tile"><img src="https://img.icons8.com/fluency/48/000000/rupee.png"/><div class="small">Send Money</div></div>
+        <div class="tile"><img src="https://img.icons8.com/fluency/48/000000/gift.png"/><div class="small">Gift Card</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Bill Payments</h3>
+      <div class="grid">
+        <div class="tile">Electricity</div>
+        <div class="tile">Mobile Postpaid</div>
+        <div class="tile">DTH</div>
+        <div class="tile">Water</div>
+      </div>
+    </div>
+    <div id="msg" style="color:green"></div>
+  </div>
+
+<script>
+     const API_BASE = 'https://amazon-backend-v0nz.onrender.com';
+  async function loadBal(){
+    try{
+      const res = await fetch('/api/pay/balance');
+      if(!res.ok) throw 0;
+      const d = await res.json(); document.getElementById('bal').innerText = '₹' + d.balance;
+    }catch(e){
+      document.getElementById('bal').innerText = '₹500s';
+    }
+  }
+  document.getElementById('topBtn').addEventListener('click', async ()=>{
+    const amt = Number(document.getElementById('topAmt').value||0);
+    if(amt<=0) return alert('Enter amount');
+    const res = await fetch('/api/pay/topup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:amt})});
+    if(!res.ok){ alert('Top up failed'); return; }
+    const d = await res.json(); document.getElementById('bal').innerText = '₹' + d.balance;
+    document.getElementById('msg').innerText = 'Top up successful';
+    setTimeout(()=>document.getElementById('msg').innerText='',2000);
+  });
+
+  // Send money demo via modal prompt
+  async function sendMoney(){
+    const to = prompt('Recipient (phone/email)');
+    const amt = Number(prompt('Amount'));
+    if(!to || !amt) return;
+    const res = await fetch('/api/pay/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to,amount:amt})});
+    const d = await res.json().catch(()=>null);
+    if(!res.ok) return alert('Send failed: ' + (d && d.error ? d.error : 'error'));
+    document.getElementById('bal').innerText = '₹' + d.balance;
+    alert('Sent ₹'+amt+' to '+to);
+  }
+
+  // make Send Money tile clickable
+  document.querySelectorAll('.tile').forEach(t=>{
+    if(t.innerText.includes('Send Money')) t.style.cursor='pointer', t.addEventListener('click', sendMoney);
+  });
+
+  loadBal();
+</script>
+</body>
+</html>

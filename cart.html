@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Cart</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:Arial;margin:0;background:#f4f4f4}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:#232f3e;color:#fff}
+nav a{color:#fff;margin-left:14px;text-decoration:none}
+#cartContainer{padding:20px}
+.cart-item{display:flex;align-items:center;background:#fff;margin-bottom:12px;padding:12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.cart-item img{width:80px;height:80px;object-fit:cover;border-radius:6px;margin-right:12px}
+.cart-info{flex-grow:1}
+.cart-info h3{margin:0;font-size:16px}
+.cart-info p{margin:4px 0}
+.qty-btn{padding:4px 8px;margin:0 4px;background:#ff9900;border:none;color:#fff;border-radius:4px;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>Cart</h1>
+  <nav>
+    <a href="/amazon.html">Catalog</a>
+    <a href="/payment.html">Payment</a>
+    <a href="/api/logout" onclick="logout(event)">Logout</a>
+  </nav>
+</header>
+
+<div id="cartContainer"></div>
+
+<script>
+const API_BASE = 'https://amazon-backend-v0nz.onrender.com';
+
+async function loadCart(){
+  try {
+    const res = await fetch(API_BASE + '/api/cart', { credentials:'include' });
+    const cart = await res.json();
+    renderCart(cart);
+  } catch(e){
+    alert('Failed to load cart');
+  }
+}
+
+function renderCart(cart){
+  const container = document.getElementById('cartContainer');
+  container.innerHTML = '';
+  if(!cart.length) return container.innerHTML='<p>Your cart is empty.</p>';
+
+  cart.forEach(item=>{
+    const div = document.createElement('div');
+    div.className='cart-item';
+    div.innerHTML=`
+      <img src="${item.image}" alt="${item.name}">
+      <div class="cart-info">
+        <h3>${item.name}</h3>
+        <p>₹${item.price} x ${item.qty}</p>
+        <button class="qty-btn" onclick="updateQty(${item.id}, ${item.qty-1})">-</button>
+        <button class="qty-btn" onclick="updateQty(${item.id}, ${item.qty+1})">+</button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function updateQty(id, qty){
+  if(qty<1) qty=1;
+  try{
+    const res = await fetch(API_BASE + '/api/cart/add', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      credentials:'include',
+      body:JSON.stringify({id, qty})
+    });
+    const data = await res.json();
+    if(!res.ok) alert(data.error||'Failed');
+    else loadCart();
+  }catch(e){
+    alert('Error updating quantity');
+  }
+}
+
+async function logout(e){
+  e.preventDefault();
+  await fetch(API_BASE + '/api/logout', { credentials:'include' });
+  window.location.href='/login.html';
+}
+
+loadCart();
+</script>
+</body>
+</html>
